@@ -1,33 +1,7 @@
 import type { TreeItem, TreeItemId } from './types';
 
-/** Shared immutable instance returned by `getChildren` for leaf nodes. */
 const EMPTY_CHILDREN: TreeItem[] = [];
 
-/**
- * In-memory tree storage optimised for frequent lookups.
- *
- * Instead of re-scanning the flat `items` array on every call, the store keeps
- * three cheap-to-maintain indexes next to it:
- *
- * - `items` – the flat array returned by {@link getAll}. Kept for O(1) reads.
- * - `indexById` – `id -> position in items`, makes {@link getItem} and
- *   {@link updateItem} O(1).
- * - `childrenByParentId` – `parentId -> direct children`, makes
- *   {@link getChildren} O(1).
- *
- * Because of these indexes the hot lookups never iterate the whole array:
- *
- * | method           | complexity              |
- * | ---------------- | ----------------------- |
- * | getItem          | O(1)                    |
- * | getChildren      | O(1)                    |
- * | getAllChildren   | O(k), k = subtree size  |
- * | getAllParents    | O(d), d = depth         |
- * | setItems         | O(n)                    |
- * | addItem          | O(1) amortised          |
- * | updateItem       | O(1) (+ O(children))    |
- * | removeItem       | O(n)                    |
- */
 export class TreeStore {
   private items: TreeItem[] = [];
   private readonly indexById = new Map<TreeItemId, number>();
@@ -37,31 +11,19 @@ export class TreeStore {
     this.setItems(items);
   }
 
-  /** Returns the full flat array of stored items. */
   getAll(): TreeItem[] {
     return this.items;
   }
 
-  /** Returns the item with the given `id` or `undefined` when absent. */
   getItem(id: TreeItemId): TreeItem | undefined {
     const index = this.indexById.get(id);
     return index === undefined ? undefined : this.items[index];
   }
 
-  /**
-   * Returns the direct children of the item with the given `id`.
-   * The returned array is the live internal collection (never mutated by
-   * external code) or an empty array for leaves / unknown ids.
-   */
   getChildren(id: TreeItemId): TreeItem[] {
     return this.childrenByParentId.get(id) ?? EMPTY_CHILDREN;
   }
 
-  /**
-   * Returns every descendant of the item with the given `id` (children of
-   * children and so on). Pre-order traversal, O(k) where `k` is the size of
-   * the subtree.
-   */
   getAllChildren(id: TreeItemId): TreeItem[] {
     const result: TreeItem[] = [];
     const children = this.childrenByParentId.get(id);
@@ -89,11 +51,6 @@ export class TreeStore {
     return result;
   }
 
-  /**
-   * Returns the chain of ancestors starting from the item itself and walking
-   * up to the root. The order is relevant: `[self, parent, ..., root]`.
-   * O(d) where `d` is the depth of the item.
-   */
   getAllParents(id: TreeItemId): TreeItem[] {
     const result: TreeItem[] = [];
 
@@ -111,7 +68,6 @@ export class TreeStore {
     return result;
   }
 
-  /** Replaces the whole content of the store with the given items. O(n). */
   setItems(items: TreeItem[]): void {
     this.items = items.slice();
     this.indexById.clear();
@@ -137,7 +93,6 @@ export class TreeStore {
     }
   }
 
-  /** Adds a new item to the store. O(1) amortised. */
   addItem(item: TreeItem): void {
     if (this.indexById.has(item.id)) {
       this.removeItem(item.id);
@@ -157,10 +112,6 @@ export class TreeStore {
     }
   }
 
-  /**
-   * Updates an existing item in place (or inserts it when the id is unknown).
-   * Reparenting is handled by moving the item between the sibling lists. O(1).
-   */
   updateItem(item: TreeItem): void {
     const index = this.indexById.get(item.id);
     if (index === undefined) {
@@ -181,7 +132,6 @@ export class TreeStore {
     this.items[index] = item;
   }
 
-  /** Removes the item with the given `id` along with all of its descendants. O(n). */
   removeItem(id: TreeItemId): void {
     if (!this.indexById.has(id)) {
       return;

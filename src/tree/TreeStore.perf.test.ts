@@ -6,11 +6,6 @@ import type { TreeItem, TreeItemId } from './types';
 const TOTAL = 200_000;
 const DEPTH = 1_000;
 
-/**
- * Builds a large dataset: a chain of `DEPTH` nodes (to exercise deep
- * `getAllParents` walks) plus the rest of the items as leaves attached to the
- * deepest node (to exercise wide sibling lists).
- */
 function buildLargeItems(): TreeItem[] {
   const items: TreeItem[] = [];
 
@@ -73,9 +68,6 @@ describe('TreeStore performance', () => {
 
     expect(parents).toHaveLength(DEPTH + 1);
 
-    // Generous ceilings: on any modern machine the O(1) accesses are far
-    // below these numbers; the assertions guard against accidental O(n)
-    // re-scanning of the whole array.
     expect(setItemsMs).toBeLessThan(3_000);
     expect(getItemMs).toBeLessThan(1_000);
     expect(getChildrenMs).toBeLessThan(1_000);

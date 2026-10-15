@@ -9,11 +9,8 @@ import type { TreeItem } from '@/tree/types';
 import { createAutoGroupColumnDef, createColumnDefs, createGetDataPath } from '@/grid/treeGrid';
 
 const props = defineProps<{
-  /** Storage whose items are rendered as table rows. */
   store: TreeStore;
-  /** Bumped by the owner whenever the store content changes. */
   version: number;
-  /** Whether the data is still being fetched. */
   loading: boolean;
 }>();
 
