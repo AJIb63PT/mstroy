@@ -32,7 +32,7 @@ describe('ItemsGrid', () => {
     expect(grid.props('rowData')).toHaveLength(items.length);
   });
 
-  it('exposes the row number and category columns', () => {
+  it('exposes the row number and name columns', () => {
     const grid = mountGrid(new TreeStore(items)).findComponent(AgGridStub);
     expect((grid.props('columnDefs') as unknown[]).length).toBe(2);
   });
@@ -40,6 +40,17 @@ describe('ItemsGrid', () => {
   it('passes the loading state to the grid', () => {
     const grid = mountGrid(new TreeStore(), 0, true).findComponent(AgGridStub);
     expect(grid.props('loading')).toBe(true);
+  });
+
+  it('shows an error overlay with the escaped message', async () => {
+    const wrapper = mount(ItemsGrid, {
+      props: { store: new TreeStore(), version: 0, loading: false, error: 'bad <tag> & "quotes"' },
+      global: { stubs: { AgGridVue: AgGridStub } },
+    });
+    const template = wrapper.findComponent(AgGridStub).props('overlayNoRowsTemplate') as string;
+
+    expect(template).toContain('Ошибка загрузки данных');
+    expect(template).toContain('bad &lt;tag&gt; &amp; &quot;quotes&quot;');
   });
 
   it('computes the tree path from the store', () => {

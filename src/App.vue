@@ -9,14 +9,21 @@ import type { TreeItem } from '@/tree/types';
 const store = new TreeStore();
 const version = ref(0);
 const isLoading = ref(true);
+const loadError = ref<string | null>(null);
 
 const controller = new AbortController();
 
 onMounted(async () => {
-  const items: TreeItem[] = await fetchItems(controller.signal);
-  store.setItems(items);
-  version.value += 1;
-  isLoading.value = false;
+  try {
+    const items: TreeItem[] = await fetchItems(controller.signal);
+    store.setItems(items);
+    version.value += 1;
+  } catch (error) {
+    if (controller.signal.aborted) return;
+    loadError.value = error instanceof Error ? error.message : String(error);
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 onBeforeUnmount(() => controller.abort());
@@ -25,7 +32,7 @@ onBeforeUnmount(() => controller.abort());
 <template>
   <main class="app">
     <h1 class="app__title">MStroy · TreeStore</h1>
-    <ItemsGrid :store="store" :version="version" :loading="isLoading" />
+    <ItemsGrid :store="store" :version="version" :loading="isLoading" :error="loadError" />
   </main>
 </template>
 

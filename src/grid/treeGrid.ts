@@ -10,7 +10,7 @@ export function getCategory(store: TreeStore, item: TreeItem): string {
   return store.getChildren(item.id).length > 0 ? CATEGORY_GROUP : CATEGORY_ITEM;
 }
 
-export function createColumnDefs(store: TreeStore): ColDef<TreeItem>[] {
+export function createColumnDefs(): ColDef<TreeItem>[] {
   return [
     {
       headerName: 'No п\\п',
@@ -25,20 +25,20 @@ export function createColumnDefs(store: TreeStore): ColDef<TreeItem>[] {
       },
     },
     {
-      headerName: 'Категория',
-      colId: 'category',
-      width: 160,
+      headerName: 'Наименование',
+      colId: 'name',
+      field: 'label',
+      width: 240,
       sortable: false,
       filter: false,
-      valueGetter: (params) => (params.data ? getCategory(store, params.data) : ''),
     },
   ];
 }
 
-export function createAutoGroupColumnDef(): AutoGroupColumnDef<TreeItem> {
+export function createAutoGroupColumnDef(store: TreeStore): AutoGroupColumnDef<TreeItem> {
   return {
-    headerName: 'Наименование',
-    field: 'label',
+    headerName: 'Категория',
+    valueGetter: (params) => (params.data ? getCategory(store, params.data) : ''),
     flex: 1,
     minWidth: 240,
     cellRendererParams: {

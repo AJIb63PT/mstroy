@@ -36,10 +36,10 @@ describe('getCategory', () => {
 });
 
 describe('createColumnDefs', () => {
-  const columnDefs = createColumnDefs(store);
+  const columnDefs = createColumnDefs();
 
-  it('defines the row number and category columns', () => {
-    expect(columnDefs.map((def) => def.colId)).toEqual(['rowNumber', 'category']);
+  it('defines the row number and name columns', () => {
+    expect(columnDefs.map((def) => def.colId)).toEqual(['rowNumber', 'name']);
   });
 
   it('renders a 1-based row number', () => {
@@ -49,18 +49,24 @@ describe('createColumnDefs', () => {
     expect(getter(valueGetterParams(store.getAll()[1], 1))).toBe(2);
   });
 
-  it('resolves the category through the store', () => {
-    const category = columnDefs[1];
-    const getter = category.valueGetter as (params: ValueGetterParams<TreeItem>) => unknown;
-    expect(getter(valueGetterParams(store.getItem(1) as TreeItem, 0))).toBe(CATEGORY_GROUP);
-    expect(getter(valueGetterParams(store.getItem(3) as TreeItem, 2))).toBe(CATEGORY_ITEM);
+  it('shows the item label in the name column', () => {
+    expect(columnDefs[1].field).toBe('label');
   });
 });
 
 describe('createAutoGroupColumnDef', () => {
-  it('displays the label and hides the descendant count', () => {
-    expect(createAutoGroupColumnDef().field).toBe('label');
-    expect(createAutoGroupColumnDef().cellRendererParams).toEqual({ suppressCount: true });
+  it('is titled "Категория" and hides the descendant count', () => {
+    const autoGroup = createAutoGroupColumnDef(store);
+    expect(autoGroup.headerName).toBe('Категория');
+    expect(autoGroup.cellRendererParams).toEqual({ suppressCount: true });
+  });
+
+  it('resolves the category through the store', () => {
+    const getter = createAutoGroupColumnDef(store).valueGetter as (
+      params: ValueGetterParams<TreeItem>,
+    ) => unknown;
+    expect(getter(valueGetterParams(store.getItem(1) as TreeItem, 0))).toBe(CATEGORY_GROUP);
+    expect(getter(valueGetterParams(store.getItem(3) as TreeItem, 2))).toBe(CATEGORY_ITEM);
   });
 });
 

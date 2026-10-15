@@ -12,7 +12,16 @@ const props = defineProps<{
   store: TreeStore;
   version: number;
   loading: boolean;
+  error?: string | null;
 }>();
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 const theme = themeQuartz;
 
@@ -22,8 +31,8 @@ const defaultColDef: ColDef<TreeItem> = {
   suppressHeaderMenuButton: true,
 };
 
-const columnDefs = computed<ColDef<TreeItem>[]>(() => createColumnDefs(props.store));
-const autoGroupColumnDef = createAutoGroupColumnDef();
+const columnDefs: ColDef<TreeItem>[] = createColumnDefs();
+const autoGroupColumnDef = computed(() => createAutoGroupColumnDef(props.store));
 const getDataPath = computed<GetDataPath<TreeItem>>(() => createGetDataPath(props.store));
 
 const rowData = computed<TreeItem[]>(() => {
@@ -33,6 +42,12 @@ const rowData = computed<TreeItem[]>(() => {
 
 const overlayLoadingTemplate =
   '<span class="grid-loading"><span class="grid-loading__spinner"></span>Загрузка данных…</span>';
+
+const overlayNoRowsTemplate = computed(() =>
+  props.error
+    ? `<span class="grid-error" role="alert">Ошибка загрузки данных: ${escapeHtml(props.error)}</span>`
+    : '<span class="grid-empty">Нет данных для отображения</span>',
+);
 
 const gridApi = ref<GridApi<TreeItem> | null>(null);
 
@@ -57,6 +72,7 @@ defineExpose({ gridApi });
       :group-default-expanded="-1"
       :loading="loading"
       :overlay-loading-template="overlayLoadingTemplate"
+      :overlay-no-rows-template="overlayNoRowsTemplate"
       @grid-ready="onGridReady"
     />
   </div>

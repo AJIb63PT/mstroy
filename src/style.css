@@ -37,3 +37,20 @@ body,
     transform: rotate(360deg);
   }
 }
+
+.grid-error {
+  display: inline-block;
+  max-width: 480px;
+  padding: 12px 16px;
+  border: 1px solid #f5c2c0;
+  border-radius: 6px;
+  background-color: #fdecea;
+  font-size: 14px;
+  color: #b42318;
+  text-align: center;
+}
+
+.grid-empty {
+  font-size: 14px;
+  color: #52606d;
+}

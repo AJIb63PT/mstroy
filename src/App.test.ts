@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 
+import { fetchItems } from '@/api/itemsApi';
 import type { TreeItem } from '@/tree/types';
 import { AgGridStub } from '@/test/AgGridStub';
 import App from './App.vue';
@@ -28,5 +29,18 @@ describe('App', () => {
 
     expect(grid.props('loading')).toBe(false);
     expect(grid.props('rowData')).toHaveLength(items.length);
+  });
+
+  it('reports a load failure to the grid and stops loading', async () => {
+    vi.mocked(fetchItems).mockRejectedValueOnce(new Error('network down'));
+
+    const wrapper = mount(App, { global: { stubs: { AgGridVue: AgGridStub } } });
+    const grid = wrapper.findComponent(AgGridStub);
+
+    await flushPromises();
+
+    expect(grid.props('loading')).toBe(false);
+    expect(grid.props('rowData')).toHaveLength(0);
+    expect(grid.props('overlayNoRowsTemplate')).toContain('network down');
   });
 });

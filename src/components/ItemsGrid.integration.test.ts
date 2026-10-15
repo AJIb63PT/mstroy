@@ -34,8 +34,8 @@ describe('ItemsGrid (real ag-grid)', () => {
 
     const text = wrapper.text();
     expect(text.indexOf('No п')).toBeGreaterThanOrEqual(0);
-    expect(text.indexOf('No п')).toBeLessThan(text.indexOf('Наименование'));
-    expect(text.indexOf('Наименование')).toBeLessThan(text.indexOf('Категория'));
+    expect(text.indexOf('No п')).toBeLessThan(text.indexOf('Категория'));
+    expect(text.indexOf('Категория')).toBeLessThan(text.indexOf('Наименование'));
 
     wrapper.unmount();
   });

@@ -12,6 +12,7 @@ export const AgGridStub = defineComponent({
     groupDefaultExpanded: { type: Number, default: undefined },
     loading: { type: Boolean, default: undefined },
     overlayLoadingTemplate: { type: String, default: undefined },
+    overlayNoRowsTemplate: { type: String, default: undefined },
     theme: { type: Object, default: undefined },
   },
   emits: ['grid-ready'],
